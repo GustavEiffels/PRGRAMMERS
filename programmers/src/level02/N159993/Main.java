@@ -24,10 +24,12 @@ public class Main {
     public static class Point{
         public int x;
         public int y;
+        public int directionIdx;
 
-        public Point(int x, int y){
+        public Point(int x, int y,int directionIdx){
             this.x = x;
             this.y = y;
+            this.directionIdx = directionIdx;
         }
     }
 
@@ -35,14 +37,16 @@ public class Main {
 
         Main m = new Main();
         
-        String[] case01 = new String[]{"SOOOL","XXXXO","OOOOO","OXXXX","OOOOE"};
-        m.solution(case01);
+        // String[] case01 = new String[]{"SOOOL","XXXXO","OOOOO","OXXXX","OOOOE"};
+        // m.solution(case01);
+
+        String[] case02 = new String[]{"LOOXS","OOOOX","OOOOO","OOOOO","EOOOO"};
+        m.solution(case02);
 
     }
 
     public int solution(String[] maps){
         // ** 정답 
-        int answer = 0;
 
         rowSize = maps.length;
         colSize = maps[0].length();
@@ -80,9 +84,14 @@ public class Main {
         }
 
         // ** start to button
-        System.out.println(findGoal(0, 0, 0, 4));
+        int toButton = findGoal(startX, startY, buttonX, buttonY);
+        int toExit   = findGoal(buttonX, buttonY, exitX,exitY);
         
-        return answer; 
+        if(toButton == 0 || toExit == 0){
+            return -1;
+        }
+
+        return toButton+toExit; 
     }
 
     public static Integer findGoal(int startX, int startY, int goalX, int goalY) {
@@ -99,7 +108,7 @@ public class Main {
                 continue;
             } 
             else {
-                queue.offer(new Point(currentX, currentY));
+                queue.offer(new Point(currentX, currentY,i));
             }
         }
 
@@ -116,6 +125,7 @@ public class Main {
                 Point p = queue.poll(); 
                 int x = p.x;
                 int y = p.y;
+                int d = p.directionIdx;
 
                 if( x == goalX && y == goalY){
                     isFind = true;
@@ -123,13 +133,18 @@ public class Main {
                 }
                 else {
                     for(int k = 0; k<4; k++){
-                        int currentX = startX+row[k];
-                        int currentY = startY+col[k];
-                        if(currentX >= rowSize || currentX < 0 || currentY >= colSize || currentY < 0 || miro[currentX][currentY] == 'X') {
+                        if(d == 0 && k == 2 || d == 1 && k == 3 || d == 2 && k == 0 || d == 3 && k == 1 ) {
                             continue;
                         } 
                         else {
-                            queue.offer(new Point(currentX, currentY));
+                            int currentX = x+row[k];
+                            int currentY = y+col[k];
+                            if(currentX >= rowSize || currentX < 0 || currentY >= colSize || currentY < 0 || miro[currentX][currentY] == 'X') {
+                                continue;
+                            } 
+                            else {
+                                queue.offer(new Point(currentX, currentY,k));
+                            }
                         }
                     }
                 }
