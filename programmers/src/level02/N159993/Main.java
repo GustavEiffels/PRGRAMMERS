@@ -14,22 +14,20 @@ import java.util.Queue;
  */
 public class Main {
     
-    public static int[] row = new int[]{0,1,0,-1};
-    public static int[] col = new int[]{1,0,-1,0};
+    public static int[] row = new int[]{0, 1, 0, -1};
+    public static int[] col = new int[]{1, 0, -1, 0};
 
     public static int rowSize;
     public static int colSize;
     public static char[][] miro;
 
-    public static class Point{
+    public static class Point {
         public int x;
         public int y;
-        public int directionIdx;
 
-        public Point(int x, int y,int directionIdx){
+        public Point(int x, int y) {
             this.x = x;
             this.y = y;
-            this.directionIdx = directionIdx;
         }
     }
 
@@ -37,125 +35,92 @@ public class Main {
 
         Main m = new Main();
         
-        // String[] case01 = new String[]{"SOOOL","XXXXO","OOOOO","OXXXX","OOOOE"};
-        // m.solution(case01);
+        String[] case01 = new String[]{"SOOOL","XXXXO","OOOOO","OXXXX","OOOOE"};
+        System.out.println(m.solution(case01));
 
         String[] case02 = new String[]{"LOOXS","OOOOX","OOOOO","OOOOO","EOOOO"};
-        m.solution(case02);
+        System.out.println(m.solution(case02));
 
     }
 
-    public int solution(String[] maps){
-        // ** 정답 
-
+    public int solution(String[] maps) {
         rowSize = maps.length;
         colSize = maps[0].length();
 
-        int startX  = 0;
-        int startY  = 0;
-
+        int startX = 0;
+        int startY = 0;
         int buttonX = 0;
         int buttonY = 0;
-
-        int exitX   = 0;
-        int exitY   = 0;
-
+        int exitX = 0;
+        int exitY = 0;
 
         miro = new char[rowSize][colSize];
 
-        // ** Array  Setting  
-        for(int i = 0; i<rowSize; i++){
-            for(int k = 0; k<colSize; k++){
+        // Array setting
+        for (int i = 0; i < rowSize; i++) {
+            for (int k = 0; k < colSize; k++) {
                 char current = maps[i].charAt(k);
-                if(current == 'S'){
+                if (current == 'S') {
                     startX = i;
                     startY = k;
-                } 
-                else if(current == 'L') {
+                } else if (current == 'L') {
                     buttonX = i;
                     buttonY = k;
-                }
-                else if(current == 'E') {
+                } else if (current == 'E') {
                     exitX = i;
-                    exitX = k;
+                    exitY = k;
                 }
                 miro[i][k] = current;
             }
         }
 
-        // ** start to button
+        // start to button
         int toButton = findGoal(startX, startY, buttonX, buttonY);
-        int toExit   = findGoal(buttonX, buttonY, exitX,exitY);
+        // button to exit
+        int toExit = findGoal(buttonX, buttonY, exitX, exitY);
         
-        if(toButton == 0 || toExit == 0){
+        if (toButton == -1 || toExit == -1) {
             return -1;
         }
 
-        return toButton+toExit; 
+        return toButton + toExit; 
     }
 
-    public static Integer findGoal(int startX, int startY, int goalX, int goalY) {
+    public static int findGoal(int startX, int startY, int goalX, int goalY) {
         Queue<Point> queue = new LinkedList<>();
+        boolean[][] visited = new boolean[rowSize][colSize];
 
-        boolean isFind = false;
+        queue.offer(new Point(startX, startY));
+        visited[startX][startY] = true;
         int fastWay = 0;
 
-        // ** init Setting 
-        for(int i = 0; i<4; i++){
-            int currentX = startX+row[i];
-            int currentY = startY+col[i];
-            if(currentX >= rowSize || currentX < 0 || currentY >= colSize || currentY < 0 || miro[currentX][currentY] == 'X') {
-                continue;
-            } 
-            else {
-                queue.offer(new Point(currentX, currentY,i));
-            }
-        }
-
-        if(queue.size() == 0){
-            return fastWay;
-        }
-
-
-        while(!isFind||queue.size() != 0 ) {
-            fastWay++;
+        while (!queue.isEmpty()) {
             int currentQueueSize = queue.size();
 
-            for(int i = 0; i<currentQueueSize; i++){
-                Point p = queue.poll(); 
+            for (int i = 0; i < currentQueueSize; i++) {
+                Point p = queue.poll();
                 int x = p.x;
                 int y = p.y;
-                int d = p.directionIdx;
 
-                if( x == goalX && y == goalY){
-                    isFind = true;
-                    break;
+                if (x == goalX && y == goalY) {
+                    return fastWay;
                 }
-                else {
-                    for(int k = 0; k<4; k++){
-                        if(d == 0 && k == 2 || d == 1 && k == 3 || d == 2 && k == 0 || d == 3 && k == 1 ) {
-                            continue;
-                        } 
-                        else {
-                            int currentX = x+row[k];
-                            int currentY = y+col[k];
-                            if(currentX >= rowSize || currentX < 0 || currentY >= colSize || currentY < 0 || miro[currentX][currentY] == 'X') {
-                                continue;
-                            } 
-                            else {
-                                queue.offer(new Point(currentX, currentY,k));
-                            }
-                        }
-                    }
+
+                for (int k = 0; k < 4; k++) {
+                    int currentX = x + row[k];
+                    int currentY = y + col[k];
+
+                    if (currentX >= rowSize || currentX < 0 || currentY >= colSize || currentY < 0 || miro[currentX][currentY] == 'X' || visited[currentX][currentY]) {
+                        continue;
+                    } 
+
+                    queue.offer(new Point(currentX, currentY));
+                    visited[currentX][currentY] = true;
                 }
             }
-            currentQueueSize = queue.size();
+            fastWay++;
         }
 
-        if(isFind) {
-            return fastWay;    
-        }
-
-        return 0;
+        return -1;
     }
 }
