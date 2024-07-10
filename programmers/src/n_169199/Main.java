@@ -7,188 +7,124 @@ public class Main {
     public static void main(String[] args) {
         Main m = new Main();
         String[] s1 = new String[]{"...D..R", ".D.G...", "....D.D", "D....D.", "..D...."};
+        String[] s2 = new String[]{".D.R", "....", ".G..", "...D"};
 
-        m.solution(s1);
+        System.out.println(m.solution(s1));
+        System.out.println(m.solution(s2));
     }
 
-    public class PointRecord{
-        public PointRecord(char type){
-            this.type = type;
+    
+
+    /**
+     * 1.시작점을 찾는다
+        2.bfs 에서 시작점에서 미끄러진다
+        미끄러지기
+        - 미끄러지는 방향으로 -1이나 배열의 크기, 장애물을 만나는 경우 연산을 중지 연산하기 바로 이전 위치 값을 반환
+        이미 지났던 곳인지 확인 후 이미 지난 곳이 아닌 경우 queue에 추가
+     */
+
+
+    public class Node{
+        public int  row;
+        public int  col;
+        public char chr;
+        public Node(int row, int col, char chr){
+            this.col = col;
+            this.row = row;
+            this.chr = chr;
         }
-        public char type;
-        public boolean isAbleN = true;
-        public boolean isAbleE = true;
-        public boolean isAbleS = true;
-        public boolean isAbleW = true;
     }
 
-    public class Point{
-        public int x;
-        public int y;
-
-        public Point(int x, int y){
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    static int[] d_r = {-1,0,1,0};
-    static int[] d_c = {0,1,0,-1};
-
-    static int board_r;
-    static int board_c;
-
-    static PointRecord[][] boardArr;
 
     public int solution(String[] board) {
-        board_r = board.length;
-        board_c = board[0].length();
+        
+        // ** 배열 생성 - 갔었는지 확인하기 위함 
+        int board_row           = board.length;      // 열 
+        int board_col           = board[0].length(); // 행 
+        int start_row           = 0;
+        int start_col           = 0;
+        char[][]    boardArr   = new char[board_row][board_col];
 
-        int start_r = 0;
-        int start_c = 0;
-
-        boardArr = new PointRecord[board_r][board_c];
-
-        for(int i = 0; i<board_r; i++){
-            String board_line = board[i];
-            for(int j = 0; j<board_c; j++){
-                char type = board_line.charAt(j);
-                if(type == 'R') {
-                    start_r = i;
-                    start_c = j;
+        for(int i = 0; i<board_row; i++){
+            String stringLine   = board[i];
+            for(int j=0; j<board_col; j++) {
+                char currentChar = stringLine.charAt(j);
+                if(currentChar == 'R'){
+                    start_row = i;
+                    start_col = j;
                 }
-                PointRecord record = new PointRecord(type);
-                if(i == 0)              record.isAbleN = false;
-                if(i == board_r -1 )    record.isAbleS = false;
-                if(j == board_c -1)              record.isAbleE = false;
-                if(j == 0 )    record.isAbleW = false;
-
-                boardArr[i][j] = record;
+                boardArr[i][j] = currentChar;
             }
         }
-
-        BFS(start_r,start_c);
-
-        return 0;
+        
+        int answer = BFS(boardArr, start_row, start_col, board_row, board_col);
+        
+        return answer;
     }
+    
+    public int BFS(char[][] boardArr, int row, int col, int board_row, int board_col){
 
-    public int BFS(int start_r, int start_c){
-        Queue<Point>    pointQueue      = new LinkedList<>()          ;
-        int             level           = 0                           ;
+        // ** 시작점과 끝점이 반드시 나옴 => 겹치는 일 없음으로 시작점이 종료점인 경우는 존재하지 않는다.
+        Queue<Node> queue  = new LinkedList<>();
+                    queue.offer(new Node(row, col,'X'));
+        int         level  = -1;
+        int[]       d_row  = {-1,0,1,0};
+        int[]       d_col  = {0,1,0,-1};
+        boolean     isFind = false;
+        boardArr[row][col] = 'X';
 
-        PointRecord     pointRecord = boardArr[start_r][start_c];
-        boolean[]       booleans    = new boolean[]{pointRecord.isAbleN, pointRecord.isAbleE, pointRecord.isAbleS, pointRecord.isAbleW};
+        // ** 경우가 존재하지 않을 때 까지 순회 
+        while(!queue.isEmpty()){
+            level++;
+            int queueSize = queue.size();
 
-        if( pointRecord.type == 'G' ) {
-            return level;
-        }
-        else {
-            int bolIndex = 0;
-            for(boolean bol : booleans ){
+            for(int i = 0; i<queueSize; i++) {
+                Node currentNode = queue.poll();
+                int  currentRow  = currentNode.row;
+                int  currentCol  = currentNode.col; 
 
-                if( bol ){
-                    boardArr[start_r][start_c].isAbleN = false;
-                    Point p = getPoint(start_r,start_c,bolIndex);
-                    if( p != null ){
-                        pointQueue.offer(p);
-                    }
-                }
-            }
-
-            if ( pointRecord.isAbleN  ){
-                boardArr[start_r][start_c].isAbleN = false;
-                Point p = getPoint(start_r,start_c,0);
-                if( p != null ){
-                    pointQueue.offer(p);
-                }
-            }
-            if ( pointRecord.isAbleE  ){
-                boardArr[start_r][start_c].isAbleE = false;
-                Point p = getPoint(start_r,start_c,1);
-                if( p != null ){
-                    pointQueue.offer(p);
-                }
-            }
-            if ( pointRecord.isAbleS  ){
-                boardArr[start_r][start_c].isAbleS = false;
-                Point p = getPoint(start_r,start_c,2);
-                if( p != null ){
-                    pointQueue.offer(p);
-                }
-            }
-            if ( pointRecord.isAbleW  ){
-                boardArr[start_r][start_c].isAbleW = false;
-                Point p = getPoint(start_r,start_c,3);
-                if( p != null ){
-                    pointQueue.offer(p);
-                }
-            }
-
-            boolean isFind = false;
-
-
-            while(!pointQueue.isEmpty()){
-                int current_length = pointQueue.size();
-
-                level++;
-
-                for(int i = 0; i<current_length; i++ ){
-                    Point       p  = pointQueue.poll();
-                    PointRecord pr = boardArr[p.x][p.y];
-                    if(pr.type == 'G'){
-                        isFind = true;
-                        break;
-                    }
-                    else {
-
-                    }
-                }
-
-                if(isFind){
+                if( currentNode.chr == 'G') {
+                    
+                    isFind = true;
                     break;
+                }
+                else {
+                    for(int k = 0; k<4; k++){
+                        int dr  = d_row[k];
+                        int dc  = d_col[k];
+                        int pr  = currentRow;
+                        int pc  = currentCol;
+
+                        // 멈추는 조건 
+                        while(true){
+                            pr += dr;
+                            pc += dc;
+
+                            if( pr == -1 || pr == board_row || pc == -1 || pc == board_col || boardArr[pr][pc] == 'D' ){
+                                pr -= dr;
+                                pc -= dc;
+                                break;
+                            }
+                        }
+                        char nextChar = boardArr[pr][pc];                        
+                        if( nextChar != 'X' ) {
+                            queue.offer(new Node(pr, pc,nextChar));
+                            if(nextChar == 'G'){
+                                break;
+                            }
+                            boardArr[pr][pc] = 'X';
+                        }
+                    }
                 }
             }
 
             if(isFind){
-                return level;
-            }
-            else{
-                return -1;
-            }
-        }
-
-
-        return 0;
-    }
-
-    public Point getPoint(int row, int col, int index){
-
-        int init_r  = row ;
-        int init_c  = col ;
-        int index_r = d_r[index];
-        int index_c = d_c[index];
-
-        Point p = null;
-
-
-        while(true){
-            int pre_r = row+index_r;
-            int pre_c = col+index_c;
-
-            if( (pre_r == -1 || pre_r >= board_r) || ( pre_c == -1 || pre_c >= board_c ) || boardArr[pre_r][pre_c].type == 'D' ){
-                if( !(init_r == row && init_c == col)){
-                    p = new Point(row,col);
-                }
                 break;
             }
-            else {
-                row += index_r;
-                col += index_c;
-            }
         }
-
-        return p;
+        // BFS END 
+        if(isFind)return level;
+        else return -1;
     }
-
 
 }
