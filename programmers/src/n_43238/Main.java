@@ -1,7 +1,6 @@
 
 package n_43238;
 
-import java.awt.image.BandedSampleModel;
 import java.util.Arrays;
 
 public class Main {
