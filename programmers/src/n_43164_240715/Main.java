@@ -13,38 +13,28 @@ public class Main {
 
     }
 
-    public class Ticket{
-        public String from;
-        public String to;
 
-        public Ticket(String from, String to){
-            this.from = from;
-            this.to = to;
-        }
-    }
-
-    public int ticket_cnt;
-    public Map<String,List<Ticket>> fromTicketMap = new HashMap<>();
     public String[] solution(String[][] tickets) {
-        ticket_cnt      = tickets.length;
-        Ticket[] ticketArr  = new Ticket[ticket_cnt];
 
-        for(int i = 0;i<ticket_cnt;i++){
-            String fromStr   = tickets[i][0];
-            Ticket newTicket = new Ticket(fromStr,tickets[i][1]);
-            ticketArr[i]     = newTicket;
-
-            if(fromTicketMap.containsKey(fromStr)){
-                fromTicketMap.get(fromStr).add(newTicket);
-            }
-            else{
-                List<Ticket> list = new ArrayList<>();
-                list.add(newTicket);
-                fromTicketMap.put(fromStr,list);
-            }
+        Map<String,PriorityQueue<String>> graph = new HashMap<>();
+        List<String> answer = new ArrayList<>();
+        for(String[] ticket:tickets){
+            graph.putIfAbsent(ticket[0],new PriorityQueue<>());
+            graph.get(ticket[0]).offer(ticket[1]);
         }
 
-
-        return null;
+        Stack<String> stack = new Stack<>();
+        stack.push("ICN");
+        while (!stack.isEmpty()) {
+            String from = stack.peek();
+            // 그래프에 from 이 존재하며 graph
+            if (graph.containsKey(from) && !graph.get(from).isEmpty()) {
+                stack.push(graph.get(from).poll());
+            } else {
+                answer.add(stack.pop());
+            }
+        }
+        Collections.reverse(answer);
+        return answer.toArray(new String[0]);
     }
 }
