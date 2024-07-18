@@ -1,6 +1,5 @@
 package n_178870_240716;
 
-import java.util.Comparator;
 import java.util.PriorityQueue;
 
 public class Main {
@@ -9,57 +8,92 @@ public class Main {
         int[] sequence_1 = new int[]{1, 2, 3, 4, 5};
         int   k_1        = 7;
 
-        PriorityQueue<Point> pq = new PriorityQueue<>();
+        int[] sequence_2 = new int[]{1, 1, 1, 2, 3, 4, 5};
+        int   k_2        = 5;
 
-        // 우선순위 큐에 아이템 추가
-        pq.add(new Point(1, 5));
-        pq.add(new Point(1, 3));
-        pq.add(new Point(2, 2));
-        pq.add(new Point(0, 1));
+        int[] sequence_3 = new int[]{2,2,2,2,2,2};
+        int   k_3        = 6;
 
-        // 우선순위 큐에서 아이템을 하나씩 꺼내어 출력
-        while (!pq.isEmpty()) {
-            System.out.println(pq.poll());
-        }
+        int[] sequence_4 = new int[]{1, 2, 3, 4, 10, 10};
+        int   k_4        = 10;
+
+        int[] sequence_5 = new int[]{2, 2, 2, 2, 2};
+        int   k_5        = 2;
+
+        m.solution(sequence_1,k_1);
+        System.out.println();
+        m.solution(sequence_2,k_2);
+        System.out.println();
+        m.solution(sequence_3,k_3);
+        System.out.println();
+        m.solution(sequence_4,k_4);
+        System.out.println();
+        m.solution(sequence_5,k_5);
+        System.out.println();
+
     }
 
-    public class Point implements Comparator<Point>{
+    public class Point {
         public int size;
         public int first;
         public Point(int size, int first){
             this.size  = size;
             this.first = first;
         }
-
-        @Override
-        public int compare(Point p1, Point p2) {
-            if (p1.size != p2.size) {
-                return Integer.compare(p1.size, p2.size);
-            } else {
-                return Integer.compare(p1.first, p2.first);
-            }
-        }
     }
 
     public int[] solution(int[] sequence, int k) {
-        // ** 7 은 타겟이다.
+        PriorityQueue<Point> pq = new PriorityQueue<>((o1, o2) -> {
+            if (o1.size != o2.size) {
+                return Integer.compare(o1.size, o2.size);
+            }
+            return Integer.compare(o1.first, o2.first);
+        });
+
         int lt  = 0 ;
         int rt  = 1 ;
-        int sum = sequence[lt]+sequence[rt] ;
+        int sequenceSize = sequence.length;
 
+        if(sequence[lt] == k){
+            pq.offer(new Point(1,0));
+        }
+        else{
+            int sum = sequence[lt]+sequence[rt] ;
 
+            if(sum == k){
+                pq.offer(new Point(2,0));
+                sum -= sequence[lt++];
+                sum -= sequence[rt++];
+                sum += sequence[lt];
+                sum += sequence[rt];
+            }
 
-        if(sum == k){
-
+            while(lt<=rt){
+                if(sum < k){
+                    if( rt + 1 == sequenceSize ){
+                        break;
+                    }
+                    sum += sequence[++rt];
+                }
+                // sum  보다 큰 경우
+                else if( sum > k ){
+                    sum -= sequence[lt++];
+                }
+                // 같은 경우
+                else {
+                    pq.offer(new Point((rt-lt+1),lt));
+                    sum -= sequence[lt++];
+                    if(rt+1 != sequenceSize){
+                        sum += sequence[++rt];
+                    }
+                }
+            }
         }
 
-        while(lt<rt){
+        Point resultPoint = pq.poll();
+//        System.out.println("resultPoint.first : "+resultPoint.first);
+//        System.out.println("resultPoint.first+resultPoint.size-1 : "+(resultPoint.first+resultPoint.size-1));
 
-        }
-
-        int[] answer = {};
-
-
-        return answer;
+        return new int[]{resultPoint.first,resultPoint.first+resultPoint.size-1};
     }
 }
