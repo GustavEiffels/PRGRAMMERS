@@ -8,28 +8,15 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String result = "ascending";
+        String input = br.readLine();
 
-        int index  = 0;
-        int before = 0;
-        for(String s : br.readLine().split(" ")){
-            
-            int current = Integer.parseInt(s);
-
-            if(index != 0){
-                if(before > current){
-                    result = "descending";
-                }
-
-                if(result.equals("descending") && before<current){
-                    result = "mixed";
-                    break;
-                }
-            }
-            
-            before = current;
-            index++;
+        if(input.equals("1 2 3 4 5 6 7 8")) {
+            System.out.println("ascending");
+        } else if(input.equals("8 7 6 5 4 3 2 1")) {
+            System.out.println("descending");
+        } else {
+            System.out.println("mixed");
         }
-        System.out.println(result);
     }
 }
+
